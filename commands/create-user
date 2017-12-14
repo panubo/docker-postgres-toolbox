@@ -30,7 +30,7 @@ else
     echo ">>> Creating user: $NEW_NAME..."
 fi
 
-$PSQL -c "CREATE ROLE ${NEW_NAME} WITH PASSWORD '$NEW_PASS';"
+$PSQL -c "CREATE ROLE ${NEW_NAME} WITH LOGIN PASSWORD '$NEW_PASS';"
 $PSQL -c "GRANT ${NEW_NAME} TO ${USER};"
 
 if [ "$CREATE_DB" == 'true' ]; then
