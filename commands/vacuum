@@ -16,7 +16,7 @@ fi
 echo -n "Vacuuming..."
 for DB in $DATABASES; do
     echo -n " $DB"
-    $PSQL -t --dbname=${DB} -c 'VACUUM FULL;'
+    $PSQL -t --dbname=${DB} -c 'VACUUM FULL;' > /dev/null
 done
 echo ". Done."
 
