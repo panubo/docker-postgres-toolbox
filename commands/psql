@@ -6,4 +6,4 @@ set -e -o pipefail
 
 wait_postgres
 
-exec psql
+exec $PSQL
