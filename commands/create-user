@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+[ "$DEBUG" == 'true' ] && set -x
+. "$(dirname $0)/"common.sh
+
+if [ "$1" == '--no-create-database' ]; then
+    shift;
+    CREATE_DB=false
+else
+    CREATE_DB=true
+fi
+
+if [ -z "$1" ]; then
+    echo "User not specified"
+    exit 128
+fi
+
+# Echo password if it's generated
+ECHO_PASSWORD='false' && [ "$2" == '' ] && ECHO_PASSWORD='true'
+
+NEW_NAME=$1
+NEW_PASS=${2-$(genpasswd 16)}
+
+wait_postgres
+
+if [ "$CREATE_DB" == 'true' ]; then
+    echo ">>> Creating user and database: $NEW_NAME..."
+else
+    echo ">>> Creating user: $NEW_NAME..."
+fi
+
+echo "CREATE USER ${NEW_NAME} WITH PASSWORD '$NEW_PASS';" | $PSQL
+
+if [ "$CREATE_DB" == 'true' ]; then
+    echo "CREATE DATABASE ${NEW_NAME} OWNER ${NEW_NAME};" | $PSQL
+fi
+
+echo "GRANT ALL PRIVILEGES ON DATABASE ${NEW_NAME} TO ${NEW_NAME};" | $PSQL
+
+[ "$ECHO_PASSWORD" == 'false' ] && NEW_PASS='********'
+echo "Created: ${NEW_NAME} / ${NEW_PASS}"
+echo ">>> Finished."

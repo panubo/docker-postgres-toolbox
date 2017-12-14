@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+[ "$DEBUG" == 'true' ] && set -x
+. "$(dirname $0)/"common.sh
+
+wait_postgres
+
+exec psql

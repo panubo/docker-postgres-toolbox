@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+
+[ "$DEBUG" == 'true' ] && set -x
+
+cat << EOF
+
+  Please choose a command:
+
+     create-user <username> <password>
+
+     psql - start a PostgreSQL client session
+
+     vacuum <databases>
+
+EOF
