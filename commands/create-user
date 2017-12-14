@@ -30,13 +30,14 @@ else
     echo ">>> Creating user: $NEW_NAME..."
 fi
 
-echo "CREATE USER ${NEW_NAME} WITH PASSWORD '$NEW_PASS';" | $PSQL
+$PSQL -c "CREATE ROLE ${NEW_NAME} WITH PASSWORD '$NEW_PASS';"
+$PSQL -c "GRANT ${NEW_NAME} TO ${USER};"
 
 if [ "$CREATE_DB" == 'true' ]; then
-    echo "CREATE DATABASE ${NEW_NAME} OWNER ${NEW_NAME};" | $PSQL
+    $PSQL -c "CREATE DATABASE ${NEW_NAME} OWNER ${NEW_NAME};"
 fi
 
-echo "GRANT ALL PRIVILEGES ON DATABASE ${NEW_NAME} TO ${NEW_NAME};" | $PSQL
+$PSQL -c "GRANT ALL PRIVILEGES ON DATABASE ${NEW_NAME} TO ${NEW_NAME};"
 
 [ "$ECHO_PASSWORD" == 'false' ] && NEW_PASS='********'
 echo "Created: ${NEW_NAME} / ${NEW_PASS}"
