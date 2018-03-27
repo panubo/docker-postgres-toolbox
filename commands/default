@@ -8,7 +8,9 @@ cat << EOF
 
   Please choose a command:
 
-     create-user <username> <password>
+     create-user-db <username> <password>
+
+     delete-user-db <username>
 
      psql - start a PostgreSQL client session
 
