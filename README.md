@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/panubo/docker-postgres-toolbox.svg?branch=master)](https://travis-ci.org/panubo/docker-postgres-toolbox)
 
-A collection of PostgreSQL tools for automating common tasks in a Docker-centric way.
+A collection of PostgreSQL scripts for automating common DBA tasks in a Docker-centric way.
 
 ## Documentation
 
@@ -13,7 +13,7 @@ Documentation for each subcommand:
 - [Vacuum](commands/vacuum.md)
 - [psql](commands/psql.md)
 
-## Usage
+## General Usage
 
 Using Docker links to `postgres` container:
 
