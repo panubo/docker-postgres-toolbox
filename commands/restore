@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+[ "$DEBUG" == 'true' ] && set -x
+. "$(dirname $0)/"common.sh
+
+if [ -z "$DUMP_DIR" ]; then
+    echo "DUMP_DIR not set"
+    exit 128
+fi
+
+wait_postgres
+
+if [ -z "$1" ]; then
+    DUMPS=$(find ${DUMP_DIR} -name '*.sql.gz' | xargs -n 1 -I % basename % .sql.gz )
+else
+    DUMPS=$@
+fi
+
+echo -n "Restoring..."
+for DB in $DUMPS; do
+    echo -n " $DB"
+    zcat ${DUMP_DIR}/${DB}.sql.gz | $PSQL
+done
+echo ". Done."
+
+echo "Finished."

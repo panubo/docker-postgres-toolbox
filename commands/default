@@ -16,6 +16,8 @@ cat << EOF
 
      psql - start a PostgreSQL client session
 
+     restore <databases>
+
      vacuum <databases>
 
 EOF

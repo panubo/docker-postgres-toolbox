@@ -13,6 +13,7 @@ Documentation for each subcommand:
 - [Dump](commands/dump.md)
 - [Vacuum](commands/vacuum.md)
 - [psql](commands/psql.md)
+- [Restore](commands/restore.md)
 
 ## General Usage
 
