@@ -7,7 +7,7 @@ PASS="${DATABASE_PASS-${POSTGRES_ENV_POSTGRES_PASSWORD}}"
 export PGPASSWORD="${PASS}"
 PGCONN="--username=${USER} --host=${HOST} --port=${PORT}"
 PSQL="psql ${PGCONN}"
-# PSQLDUMP="psqldump $PGCONN"
+PGDUMP="pg_dump ${PGCONN}"
 GZIP="gzip --fast"
 
 

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+[ "$DEBUG" == 'true' ] && set -x
+. "$(dirname $0)/"common.sh
+
+if [ -z "$DUMP_DIR" ]; then
+    echo "DUMP_DIR not set"
+    exit 128
+fi
+
+wait_postgres
+
+if [ -z "$1" ]; then
+    DATABASES=$($PSQL -t -c "SELECT datname FROM pg_database WHERE datname NOT IN ('template0', 'template1');")
+else
+    DATABASES=$@
+fi
+
+echo -n "Dumping..."
+for DB in $DATABASES; do
+    echo -n " $DB"
+    $PGDUMP --create --format=plain ${DB} | $GZIP > ${DUMP_DIR}/${DB}.sql.gz
+done
+echo ". Done."
+
+echo "Finished."

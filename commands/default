@@ -12,6 +12,8 @@ cat << EOF
 
      delete-user-db <username>
 
+     dump <databases>
+
      psql - start a PostgreSQL client session
 
      vacuum <databases>
