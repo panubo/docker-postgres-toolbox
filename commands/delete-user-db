@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+[ "$DEBUG" == 'true' ] && set -x
+. "$(dirname $0)/"common.sh
+
+if [ "$1" == '--no-delete-database' ]; then
+    shift;
+    DELETE_DB=false
+else
+    DELETE_DB=true
+fi
+
+if [ -z "$1" ]; then
+    echo "User not specified"
+    exit 128
+fi
+
+DB_NAME=$1
+
+wait_postgres
+
+if [ "$DELETE_DB" == 'true' ]; then
+    echo ">>> Deleting user and database: $DB_NAME..."
+else
+    echo ">>> Deleting user: $DB_NAME..."
+fi
+
+if [ "$DELETE_DB" == 'true' ]; then
+    $PSQL -c "DROP DATABASE IF EXISTS ${DB_NAME};"
+fi
+
+$PSQL -c "DROP USER IF EXISTS ${DB_NAME};"
+
+echo "Deleted: ${DB_NAME}"
+echo ">>> Finished."

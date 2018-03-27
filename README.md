@@ -9,6 +9,7 @@ A collection of PostgreSQL tools for automating common tasks in a Docker-centric
 Documentation for each subcommand:
 
 - [Create User/DB](commands/create-user-db.md)
+- [Delete User/DB](commands/delete-user-db.md)
 - [Vacuum](commands/vacuum.md)
 - [psql](commands/psql.md)
 
