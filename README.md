@@ -8,7 +8,7 @@ A collection of PostgreSQL tools for automating common tasks in a Docker-centric
 
 Documentation for each subcommand:
 
-- [Create User](commands/create-user.md)
+- [Create User/DB](commands/create-user-db.md)
 - [Vacuum](commands/vacuum.md)
 - [psql](commands/psql.md)
 
@@ -39,4 +39,4 @@ Some subcommands require additional environment parameters.
 
 ## Status
 
-Incomplete. Work in progress.
+Feature incomplete. Work in progress.
