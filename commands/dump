@@ -20,7 +20,7 @@ fi
 echo -n "Dumping..."
 for DB in $DATABASES; do
     echo -n " $DB"
-    $PGDUMP --create --format=plain ${DB} | $GZIP > ${DUMP_DIR}/${DB}.sql.gz
+    $PGDUMP --no-owner --no-acl --format=plain ${DB} | $GZIP > ${DUMP_DIR}/${DB}.sql.gz
 done
 echo ". Done."
 
