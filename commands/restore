@@ -21,6 +21,7 @@ echo -n "Restoring..."
 for DB in $DUMPS; do
     echo -n " $DB"
     zcat ${DUMP_DIR}/${DB}.sql.gz | $PSQL --dbname=${DB}
+    $PSQL --dbname=${DB} -c "REASSIGN OWNED BY postgres TO ${DB};"
 done
 echo ". Done."
 
