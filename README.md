@@ -10,10 +10,10 @@ Documentation for each subcommand:
 
 - [Create User/DB](commands/create-user-db.md)
 - [Delete User/DB](commands/delete-user-db.md)
-- [Dump](commands/dump.md)
+- [Save](commands/save.md)
+- [Load](commands/load.md)
 - [Vacuum](commands/vacuum.md)
 - [psql](commands/psql.md)
-- [Restore](commands/restore.md)
 
 ## General Usage
 
