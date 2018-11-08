@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+[ "$DEBUG" == 'true' ] && set -x
+. "$(dirname $0)/"common.sh
+
+if [ -z "$1" ]; then
+    echo "Database not specified"
+    exit 128
+fi
+
+if [ -z "$2" ]; then
+    echo "User not specified"
+    exit 128
+fi
+
+# Echo password if it's generated
+ECHO_PASSWORD='false' && [ "$2" == '' ] && ECHO_PASSWORD='true'
+
+DATABASE=$1
+USERNAME=$2
+USERPASS=${3-$(genpasswd 16)}
+
+wait_postgres
+
+echo ">>> Creating readonly user: $USERNAME..."
+
+$PSQL -c "CREATE ROLE ${USERNAME} WITH LOGIN PASSWORD '$USERPASS';"
+#$PSQL -c "GRANT ${USERNAME} TO ${USERNAME};"
+
+$PSQL -c "GRANT CONNECT ON DATABASE ${DATABASE} TO ${USERNAME};"
+$PSQL -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO ${USERNAME};"
+
+[ "$ECHO_PASSWORD" == 'false' ] && USERPASS='********'
+echo "Created: ${USERNAME} / ${USERPASS}"
+echo ">>> Finished."
