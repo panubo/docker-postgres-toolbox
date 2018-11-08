@@ -31,7 +31,7 @@ else
 fi
 
 $PSQL -c "CREATE ROLE ${NEW_NAME} WITH LOGIN PASSWORD '$NEW_PASS';"
-$PSQL -c "GRANT ${NEW_NAME} TO ${USER};"
+$PSQL -c "GRANT ${NEW_NAME} TO ${USER};" # AWS RDS
 
 if [ "$CREATE_DB" == 'true' ]; then
     $PSQL -c "CREATE DATABASE ${NEW_NAME} OWNER ${NEW_NAME};"
