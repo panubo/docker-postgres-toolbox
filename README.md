@@ -10,6 +10,7 @@ Documentation for each subcommand:
 
 - [Create User/DB](commands/create-user-db.md)
 - [Delete User/DB](commands/delete-user-db.md)
+- [Create Read-only User](commands/create-readonly-user.md)
 - [Save](commands/save.md)
 - [Load](commands/load.md)
 - [Vacuum](commands/vacuum.md)
