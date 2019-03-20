@@ -8,25 +8,23 @@ A collection of PostgreSQL scripts for automating common DBA tasks in a Docker-c
 
 Documentation for each subcommand:
 
-- [Create User/DB](commands/create-user-db.md)
-- [Delete User/DB](commands/delete-user-db.md)
-- [Create Read-only User](commands/create-readonly-user.md)
-- [Save](commands/save.md)
-- [Load](commands/load.md)
-- [Vacuum](commands/vacuum.md)
+- [create-user-db](commands/create-user-db.md)
+- [delete-user-db](commands/delete-user-db.md)
+- [create-readonly-user](commands/create-readonly-user.md)
+- [save](commands/save.md)
+- [load](commands/load.md)
+- [vacuum](commands/vacuum.md)
 - [psql](commands/psql.md)
 
 ## General Usage
 
-Using Docker links to `postgres` container:
+Using Docker links to `postgres` container. This will display the usage information:
 
 ```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox```
 
-This will display the usage information.
+To run the subcommand:
 
 ```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox <subcommand>```
-
-To run the subcommand.
 
 ## Configuration
 
