@@ -1,18 +1,16 @@
-NAME = panubo/postgres-toolbox
-VERSION = `git describe --long --tags --dirty --always`
+NAME       := postgres-toolbox
+TAG        := latest
+IMAGE_NAME := panubo/$(NAME)
 
-.PHONY: all build tag_latest test clean
-
-all:    clean build
-
+.PHONY: build test push clean
 build:
-	docker build --no-cache -t $(NAME):$(VERSION) .
-
-tag_latest:
-	docker tag -f $(NAME):$(VERSION) $(NAME):latest
+	docker build --pull -t $(IMAGE_NAME):$(TAG) .
 
 test:
 	./tests/dind-runner.sh
 
+push:
+	docker push $(IMAGE_NAME):$(TAG)
+
 clean:
-	docker images | grep $(NAME) | awk '{ print $$3 }' | xargs -r docker rmi
+	docker rmi $(IMAGE_NAME):$(TAG)
