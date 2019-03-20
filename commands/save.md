@@ -20,6 +20,7 @@ Alternatively specify the individual variables:
 ### Environment Options
 
 - `DUMP_DIR` save databases to this location
+- `PGDUMP_ARGS` pgdump arguments. Default: `--no-owner --no-acl --format=plain`
 
 ### Options
 

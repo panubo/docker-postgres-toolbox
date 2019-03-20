@@ -11,6 +11,8 @@ fi
 
 wait_postgres
 
+: ${PGDUMP_ARGS:='--no-owner --no-acl --format=plain'}
+
 if [ -z "$1" ]; then
     DATABASES=$($PSQL -t -c "SELECT datname FROM pg_database WHERE datname NOT IN ('template0', 'template1');")
 else
@@ -20,7 +22,7 @@ fi
 echo -n "Dumping..."
 for DB in $DATABASES; do
     echo -n " $DB"
-    $PGDUMP --no-owner --no-acl --format=plain ${DB} | $GZIP > ${DUMP_DIR}/${DB}.sql.gz
+    $PGDUMP ${PGDUMP_ARGS} ${DB} | $GZIP > ${DUMP_DIR}/${DB}.sql.gz
 done
 echo ". Done."
 
