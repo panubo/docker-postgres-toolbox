@@ -30,7 +30,7 @@ To run the subcommand:
 
 Use `--link <postgres container name>:postgres` to automatically specify the required variables.
 
-Or alternatively specify the variables:
+Or alternatively specify the environment variables:
 
 - `DATABASE_HOST` = IP / hostname of PostgreSQL server.
 - `DATABASE_PORT` = TCP Port of PostgreSQL service.
