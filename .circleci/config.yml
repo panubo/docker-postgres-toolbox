@@ -5,7 +5,7 @@ jobs:
       - image: docker:18.09-git
     steps:
       - run: |
-          apk add --no-cache bash
+          apk add --no-cache bash curl
       - checkout
       - setup_remote_docker
-      - run: ./tests/dind-runner.sh 
+      - run: ./tests/runner.sh 
