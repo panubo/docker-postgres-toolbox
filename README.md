@@ -1,6 +1,6 @@
 # PostgreSQL Toolbox
 
-[![Build Status](https://travis-ci.org/panubo/docker-postgres-toolbox.svg?branch=master)](https://travis-ci.org/panubo/docker-postgres-toolbox)
+[![CircleCI](https://circleci.com/gh/panubo/docker-postgres-toolbox.svg?style=svg)](https://circleci.com/gh/panubo/docker-postgres-toolbox)
 
 A collection of PostgreSQL scripts for automating common DBA tasks in a Docker-centric way.
 
