@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 
-set -e -o pipefail
-[ "$DEBUG" == 'true' ] && set -x
-. "$(dirname $0)/"common.sh
+set -euo pipefail
+IFS=$'\n\t'
 
-wait_postgres
+[[ "${DEBUG:-}" == 'true' ]] && set -x
 
-exec $PSQL
+# shellcheck source=commands/common.sh
+. "$(dirname "${0}")/common.sh"
+
+parse_options "${@}"
+
+connection_string="${connection[*]}"
+echoerr ">>> Connection: ${connection_string//$'\n'/ }"
+
+exec /usr/bin/psql "${connection[@]}"

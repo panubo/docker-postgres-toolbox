@@ -1,44 +1,84 @@
 #!/usr/bin/env bash
 
-set -e -o pipefail
-[ "$DEBUG" == 'true' ] && set -x
-. "$(dirname $0)/"common.sh
+set -euo pipefail
+IFS=$'\n\t'
 
-if [ "$1" == '--no-create-database' ]; then
-    shift;
-    CREATE_DB=false
-else
-    CREATE_DB=true
+[[ "${DEBUG:-}" == 'true' ]] && set -x
+
+# shellcheck source=commands/common.sh
+. "$(dirname "${0}")/common.sh"
+
+parse_options "${@}"
+
+usage() {
+    echoerr "Usage: ${0} [GLOBAL_OPTIONS] [OPTIONS] NEW_USER [NEW_PASSWORD]"
+    global_options
+    echoerr ""
+    echoerr "Options:"
+    echoerr "    --no-create-database    do not create a new database for the new user"
+    echoerr "    --no-revoke-public-create    do not revoke create on schema public from public"
+    echoerr ""
+    echoerr "    NEW_USER    new username"
+    echoerr "    NEW_PASSWORD    new password, a random password is generated if not specified"
+}
+
+if [[ -z "${args[0]}" ]]; then
+    echoerr "User not specified"
+    usage
+    exit 1
 fi
-
-if [ -z "$1" ]; then
-    echo "User not specified"
-    exit 128
-fi
-
-# Echo password if it's generated
-ECHO_PASSWORD='false' && [ "$2" == '' ] && ECHO_PASSWORD='true'
-
-NEW_NAME=$1
-NEW_PASS=${2-$(genpasswd 16)}
+new_user="${args[0]}"
 
 wait_postgres
 
-if [ "$CREATE_DB" == 'true' ]; then
-    echo ">>> Creating user and database: $NEW_NAME..."
+# Is this a bad idea?
+# Required for the GRANT below
+current_user="${user:-${PGUSER:-${USER}}}"
+
+
+echoerr ">>> Creating new user (ROLE)"
+# Check is new user already exists
+if [[ "$(/usr/bin/psql "${connection[@]}" -tAc "SELECT 1 FROM pg_roles WHERE rolname='${new_user}';")" != "1" ]]; then
+    # If a password wasn't passed generate a random one
+    if [[ -z "${args[1]:-}" ]]; then
+        new_password="$(genpasswd)"
+        echoerr ">>> Generated a random password: ${new_password}"
+    else
+        new_password="${args[2]}"
+    fi
+    /usr/bin/psql "${connection[@]}" -c "CREATE ROLE ${new_user} WITH LOGIN PASSWORD '${new_password}';"
 else
-    echo ">>> Creating user: $NEW_NAME..."
+    echoerr ">>> WARNING: user already exists, not creating user"
 fi
 
-$PSQL -c "CREATE ROLE ${NEW_NAME} WITH LOGIN PASSWORD '$NEW_PASS';"
-$PSQL -c "GRANT ${NEW_NAME} TO ${USER};" # AWS RDS
+# Grant the new role to the current user. Required if the user is not a superuser (such as on AWS RDS)
+echoerr ">>> Grant new role to current user"
+/usr/bin/psql "${connection[@]}" -c "GRANT ${new_user} TO ${current_user};"
 
-if [ "$CREATE_DB" == 'true' ]; then
-    $PSQL -c "CREATE DATABASE ${NEW_NAME} OWNER ${NEW_NAME};"
+if [[ "${no_create_database:-}" == "true" ]]; then
+    echoerr ">>> Notice: skipping database creation"
+else
+    echoerr ">>> Creating new database"
+    # Check is database already exists
+    if [[ "$(/usr/bin/psql "${connection[@]}" -tAc "SELECT 1 FROM pg_database WHERE datname='${new_user}';")" != "1" ]]; then
+        /usr/bin/psql "${connection[@]}" -c "CREATE DATABASE ${new_user} OWNER ${new_user};"
+    else
+        echoerr ">>> WARNING: database already exists, not creating database"
+    fi
+
+    # Update the connection string to the new database
+    # shellcheck disable=SC2034
+    dbname="${new_user}"
+    connection=()
+    for item in host port user dbname; do
+        if [[ -n "${!item:-}" ]]; then
+            connection+=("--${item}" "${!item}")
+        fi
+    done
+
+    if [[ "${no_revoke_public_create:-}" != "true" ]]; then
+        /usr/bin/psql "${connection[@]}" -c "REVOKE CREATE ON SCHEMA public FROM PUBLIC; ALTER SCHEMA public OWNER TO ${new_user};"
+    fi
 fi
 
-$PSQL -c "GRANT ALL PRIVILEGES ON DATABASE ${NEW_NAME} TO ${NEW_NAME};"
-
-[ "$ECHO_PASSWORD" == 'false' ] && NEW_PASS='********'
-echo "Created: ${NEW_NAME} / ${NEW_PASS}"
 echo ">>> Finished."

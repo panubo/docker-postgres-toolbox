@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+[[ "${DEBUG:-}" == 'true' ]] && set -x
+
+# shellcheck source=commands/common.sh
+. "$(dirname "${0}")/common.sh"
+
+parse_options "${@}"
+
+usage() {
+    echoerr "Usage: ${0} [GLOBAL_OPTIONS] [OPTIONS] DROP_USER"
+    global_options
+    echoerr ""
+    echoerr "Options:"
+    echoerr "    --drop-database    if a database with the same name as the user exits drop it"
+    echoerr ""
+    echoerr "    DROP_USER    user to drop"
+}
+
+if [[ -z "${args[0]}" ]]; then
+    echoerr "User not specified"
+    usage
+    exit 1
+fi
+drop_user="${args[0]}"
+
+wait_postgres
+
+if [[ "${drop_database:-}" == "true" ]]; then
+    echo ">>> Dropping database"
+    /usr/bin/psql "${connection[@]}" -c "DROP DATABASE IF EXISTS ${drop_user};"
+fi
+
+echoerr ">>> Dropping user (ROLE)"
+/usr/bin/psql "${connection[@]}" -c "DROP USER IF EXISTS ${drop_user};"
+
+echo ">>> Finished."

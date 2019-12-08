@@ -1,29 +1,190 @@
 #!/usr/bin/env bash
 
-set -e -o pipefail
-[ "$DEBUG" == 'true' ] && set -x
-. "$(dirname $0)/"common.sh
+set -euo pipefail
+IFS=$'\n\t'
 
-if [ -z "$DUMP_DIR" ]; then
-    echo "DUMP_DIR not set"
-    exit 128
+[[ "${DEBUG:-}" == 'true' ]] && set -x
+
+# shellcheck source=commands/common.sh
+. "$(dirname "${0}")/common.sh"
+
+# Options:
+# format sql|custom
+# compression gzip|lz4|bz2|zip|none
+# dateformat %Y%m%d%H%M%S
+# pgdump_args ""
+# checksum sha256
+# umask 0077
+# dest gs://|s3://|file://
+# databases ALL
+
+parse_options "${@}"
+
+usage() {
+    echoerr "Usage: ${0} [GLOBAL_OPTIONS] [OPTIONS] [DATABASE...] DESTINATION"
+    global_options
+    echoerr ""
+    echoerr "Options:"
+    echoerr "    --pgdump-args    NOT IMPLEMENTED"
+    echoerr "    --format    plain|custom"
+    echoerr "    --compression    gzip|lz4|bz2|none"
+    echoerr "    --date-format    %Y%m%d%H%M%S"
+    echoerr "    --checksum    sha256"
+    echoerr "    --umask    0077"
+    echoerr "    --skip-globals    skip dumping postgres globals"
+    echoerr ""
+    echoerr "    DATABASE    database(s) to dump. Will dump all if no databases are specified."
+    echoerr "    DESTINATION    Destination to save database dumps to. s3://, gs:// and files are supported."
+}
+
+# Pick up the destination parameter, should always be the last parameter based on standard SRC DEST parameter order
+if [[ -z "${args[-1]:-}" ]]; then
+    echoerr "Destination is not specified."
+    usage
+    exit 1
 fi
+dest="${args[-1]}"
+unset "args[-1]"
+
+# Set the umask, umask defaults to 0077 to keep files private during db dumping 
+umask "${umask:-0077}"
+
+date="$(date --utc "+${date_format:-%Y%m%d%H%M%S}")"
+
+case "${dest}" in
+    gs://*)
+        echo ">> gsutil"
+        save_cmd=( "gsutil" "rsync" )
+        dest_type="gs"
+        ;;
+    s3://*)
+        echo ">> aws s3"
+        save_cmd=( "aws" "s3" "sync" )
+        dest_type="s3"
+        ;;
+    file://*|/*|./*)
+        echo ">> file"
+        save_cmd=( "ls" )
+        dest="${dest#file:\/\/}"
+        dest_type="file"
+        ;;
+    *)
+        echoerr "Unknown destination protocol"
+        exit 1
+        ;;
+    esac
+
+cmd_args=()
+file_ext=()
+file_path=( "${dest}" "${date}" )
+
+# TODO: extra pgdump args (somehow break this into an array)
+# TODO: extra options for each of the object storage tools, eg server side encryption settings etc
+# TODO: implement checksum option (currently locked to sha256)
+
+# Output format and extension
+case "${format:-plain}" in
+    "plain"|"p")
+        file_ext+=( ".sql" )
+        cmd_args+=( "--format=plain" )
+        ;;
+    "custom"|"c")
+        file_ext+=( ".dump" )
+        cmd_args+=( "--format=custom" )
+        ;;
+    *)
+        echoerr "Unknown format"
+        exit 1
+        ;;
+    esac
+
+# Output compression
+case "${compression:-gzip}" in
+    "gzip")
+        file_ext+=( ".gz" )
+        compression_cmd=( "gzip" "--fast" )
+        ;;
+    "lz4")
+        file_ext+=( ".lz4" )
+        compression_cmd=( "lz4" "-c" )
+        ;;
+    "bz2"|"bzip2")
+        file_ext+=( ".bz2" )
+        compression_cmd=( "bzip2" "-c" )
+        ;;
+    "zip")
+        echoerr "ZIP not implement"
+        exit 1
+        ;;
+    "none")
+        compression_cmd=( "cat" )
+        ;;
+    *)
+        echoerr "Unknown compressions method"
+        exit 1
+        ;;
+    esac
+
+# Create a temporary save path
+save_path="$(mktemp -p /var/tmp -d)/"
+
+# Setup the final path to pass to the save cmd
+full_path="$(printf "%s/" "${file_path[@]}")"
+
+# If file destination create the directories and reset the temporary save path to the final save path
+if [[ "${dest_type}" == "file" ]]; then
+    mkdir -p "${full_path}"
+    # Reset the save path if file destination
+    save_path="${full_path}/"
+fi
+
+# Put the file extensions together, dump type and compression type
+final_ext="$(printf "%s" "${file_ext[@]}")"
 
 wait_postgres
 
-: ${PGDUMP_ARGS:='--no-owner --no-acl --format=plain'}
+# Saving a list of all databases as an array
+mapfile -t all_databases < <( /usr/bin/psql "${connection[@]}" -At -c "SELECT datname FROM pg_database WHERE NOT datistemplate" )
 
-if [ -z "$1" ]; then
-    DATABASES=$($PSQL -t -c "SELECT datname FROM pg_database WHERE datname NOT IN ('template0', 'template1');")
+echo "All databases:"
+echo "${all_databases[*]}"
+
+if [[ "${#args[@]}" -gt 0 ]]; then
+    databases=( "${args[@]}" )
 else
-    DATABASES=$@
+    databases=( "${all_databases[@]}" )
+fi
+# TODO: check databases specified on command line exist in database
+
+echo "Databases to dump: ${#databases[@]}"
+echo "${databases[*]}"
+
+# Save the postgres globals - always sql format
+# TODO: this could do with a clean up
+if [[ "${skip_globals:-}" != "true" ]]; then
+  database="gloabls"
+  # TODO: this may break is compression none is used
+  save_dest="${save_path}${database}.sql${file_ext[-1]}"
+  echo ">> Saving ${database} to ${save_dest}"
+  pg_dumpall "${connection[@]}" --globals-only | "${compression_cmd[@]}" | tee >(sha256sum > /tmp/sha.txt) > "${save_dest}"
+  awk "{print \$1 \"  ${database}.sql${file_ext[-1]}\"}" < /tmp/sha.txt | tee -a "${save_path}/CHECKSUMS"
 fi
 
-echo -n "Dumping..."
-for DB in $DATABASES; do
-    echo -n " $DB"
-    $PGDUMP ${PGDUMP_ARGS} ${DB} | $GZIP > ${DUMP_DIR}/${DB}.sql.gz
+# loop over and save the databases
+for database in "${databases[@]}"; do
+  save_dest="${save_path}${database}${final_ext}"
+  echo ">> Saving ${database} to ${save_dest}"
+  pg_dump "${connection[@]}" "${cmd_args[@]}" "${database}" | "${compression_cmd[@]}" | tee >(sha256sum > /tmp/sha.txt) > "${save_dest}"
+  awk "{print \$1 \"  ${database}${final_ext}\"}" < /tmp/sha.txt | tee -a "${save_path}/CHECKSUMS"
 done
-echo ". Done."
 
-echo "Finished."
+# Do the upload
+if [[ "${dest_type}" == "file" ]]; then
+    ls -l "${full_path}"
+else
+    echo ">> Uploading to ${full_path}"
+    "${save_cmd[@]}" "${save_path}" "${full_path}"
+
+    # Clean up the save path if successful and not a file type save
+    rm -rf "${save_path}"
+fi
