@@ -20,6 +20,7 @@ IFS=$'\n\t'
 
 parse_options "${@}"
 
+# TODO: add option to skip owners and acls, --no-owner --no-acl (only required for plain type dumps)
 usage() {
     echoerr "Usage: ${0} [GLOBAL_OPTIONS] [OPTIONS] [DATABASE...] DESTINATION"
     global_options
@@ -179,6 +180,7 @@ for database in "${databases[@]}"; do
 done
 
 # Do the upload
+# TODO: can we keep the local copy too?
 if [[ "${dest_type}" == "file" ]]; then
     ls -l "${full_path}"
 else

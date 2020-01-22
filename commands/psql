@@ -12,5 +12,7 @@ parse_options "${@}"
 
 connection_string="${connection[*]}"
 echoerr ">>> Connection: ${connection_string//$'\n'/ }"
+args_string="${args[*]}"
+echoerr ">>> Args: ${args_string//$'\n'/ }"
 
-exec /usr/bin/psql "${connection[@]}"
+exec /usr/bin/psql "${connection[@]}" "${args[@]}"

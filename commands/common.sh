@@ -160,7 +160,7 @@ parse_options() {
     fi
  
     # If the password was set write it to .pgpass (or save a temporary file and set PGPASSFILE)
-    if [[ -n "${password}" ]]; then
+    if [[ -n "${password:-}" ]]; then
         local old_umask
         old_umask="$(umask)"
         umask 0077

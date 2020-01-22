@@ -4,10 +4,10 @@ Command to start an interactive PostgreSQL client session.
 
 ## Configuration
 
-Use `--link <postgres container name>:postgres` to automatically specify the required variables.
+See [common usage](common.md)
 
-Alternatively specify the individual variables:
+Place any arguments for `psql` after `--`.
 
-- `DATABASE_HOST` = IP / hostname of PostgreSQL server.
-- `DATABASE_USER` = Administrative user eg postgres with SUPERUSER privileges.
-- `DATABASE_PASS` = Password of administrative user.
+```
+docker run --rm -it panubo/postgres-toolbox:latest psql -h 172.18.0.2 -W password -U myapp -- -c 'SELECT 1'
+```

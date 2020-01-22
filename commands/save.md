@@ -2,30 +2,37 @@
 
 Command to save databases.
 
-NB. This does not preserve ownership or ACLs. This command is used to reload
-or migrate databases with the presumption that the database is owned by a user
-with the same name.
+## Features
+
+* Support for plain and custom formats (see https://www.postgresql.org/docs/11/app-pgdump.html)
+* Support for various compressions types (gzip, lz4, bzip2, none)
+* Support for sha256 checksums during pg_dump operation
+* Saves postgres globals
+* Support to upload dumps to S3 or Google Cloud Storage
 
 ## Configuration
 
-Use `--link <postgres container name>:postgres` to automatically specify the required variables.
+See [common usage](common.md)
 
-Alternatively specify the individual variables:
+Additionally this command supports
 
-- `DATABASE_HOST` = IP / hostname of PostgreSQL server.
-- `DATABASE_PORT` = TCP Port of PostgreSQL service.
-- `DATABASE_USER` = Administrative user eg postgres with SUPERUSER privileges.
-- `DATABASE_PASS` = Password of administrative user.
+```
+Usage: save [GLOBAL_OPTIONS] [OPTIONS] [DATABASE...] DESTINATION
+Options:
+    --pgdump-args    NOT IMPLEMENTED
+    --format    plain|custom
+    --compression    gzip|lz4|bz2|none
+    --date-format    %Y%m%d%H%M%S
+    --checksum    sha256
+    --umask    0077
+    --skip-globals    skip dumping postgres globals
 
-### Environment Options
-
-- `DUMP_DIR` save databases to this location
-- `PGDUMP_ARGS` pgdump arguments. Default: `--no-owner --no-acl --format=plain`
-
-### Options
-
-- `<databases>...` name of database(s) to save. If not specified all databases will be saved.
+    DATABASE    database(s) to dump. Will dump all if no databases are specified.
+    DESTINATION    Destination to save database dumps to. s3://, gs:// and files are supported.
+```
 
 ## Usage Example
 
-```docker run --rm -i -t -e DATABASE_HOST=172.19.66.4 -e DATABASE_USER=root -e DATABASE_PASS=foo -e DUMP_DIR=/srv docker.io/panubo/postgres-toolbox save```
+```
+docker run --rm -i -t -e DATABASE_HOST=172.19.66.4 -e DATABASE_USER=root -e DATABASE_PASSWORD=foo docker.io/panubo/postgres-toolbox save /srv
+```
