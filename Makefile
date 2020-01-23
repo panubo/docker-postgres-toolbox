@@ -25,7 +25,7 @@ bash: .env
 	touch .env
 
 shellcheck:
-	shellcheck commands/common.sh commands/create-user-db commands/psql commands/save
+	shellcheck commands/common.sh commands/create-user-db commands/drop-user-db commands/psql commands/report commands/save
 
 beta:
 	docker tag panubo/postgres-toolbox:latest panubo/postgres-toolbox:2.0.0-beta.1

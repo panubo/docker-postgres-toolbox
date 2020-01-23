@@ -95,8 +95,8 @@ parse_options() {
           user="${2}"
           shift 2
           ;;
-        -d|--database)
-          database="${2}"
+        -d|--dbname)
+          dbname="${2}"
           shift 2
           ;;
         -W|--password)
