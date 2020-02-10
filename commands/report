@@ -40,24 +40,24 @@ echo ">> Server version"
 "${PSQL[@]}" -A -t --command 'SELECT version()'
 echo
 
-echo ">> Database name"
-"${PSQL[@]}" -A -t --command 'SELECT current_database()'
-echo
+# echo ">> Database name"
+# "${PSQL[@]}" -A -t --command 'SELECT current_database()'
+# echo
 
-echo ">> Encoding"
-"${PSQL[@]}" -A -t --command 'SHOW SERVER_ENCODING'
-echo
+# echo ">> Encoding"
+# "${PSQL[@]}" -A -t --command 'SHOW SERVER_ENCODING'
+# echo
 
-echo ">> Collate"
-"${PSQL[@]}" -A -t --command 'SHOW LC_COLLATE'
-echo
+# echo ">> Collate"
+# "${PSQL[@]}" -A -t --command 'SHOW LC_COLLATE'
+# echo
 
-echo ">> Ctype"
-"${PSQL[@]}" -A -t --command 'SHOW LC_CTYPE'
-echo
+# echo ">> Ctype"
+# "${PSQL[@]}" -A -t --command 'SHOW LC_CTYPE'
+# echo
 
 echo ">> Database owner"
-"${PSQL[@]}" -A -t --command 'SELECT u.usename 
+"${PSQL[@]}" --command 'SELECT u.usename, d.encoding, d.datcollate, d.datctype, d.datacl
 FROM pg_catalog.pg_database d 
 JOIN pg_catalog.pg_user u on (d.datdba = u.usesysid)
 WHERE d.datname = current_database()'

@@ -20,7 +20,8 @@ IFS=$'\n\t'
 
 parse_options "${@}"
 
-# TODO: add option to skip owners and acls, --no-owner --no-acl (only required for plain type dumps)
+# TODO: add option to skip owners and acls, --no-owner --no-acl (only required for plain type dumps) or this could be part of pgdump-args
+# TODO: add `--save-local DIR` to specify a local directory to keep a local copy as well as uploading to the DEST (don't delete local after upload)
 usage() {
     echoerr "Usage: ${0} [GLOBAL_OPTIONS] [OPTIONS] [DATABASE...] DESTINATION"
     global_options
@@ -160,6 +161,11 @@ fi
 echo "Databases to dump: ${#databases[@]}"
 echo "${databases[*]}"
 
+if [[ "${databases[*]}" < 1 ]]; then
+  echo ">> ERROR: no databases to dump but we expected some"
+  exit 1
+fi
+
 # Save the postgres globals - always sql format
 # TODO: this could do with a clean up
 if [[ "${skip_globals:-}" != "true" ]]; then
@@ -168,7 +174,7 @@ if [[ "${skip_globals:-}" != "true" ]]; then
   save_dest="${save_path}${database}.sql${file_ext[-1]}"
   echo ">> Saving ${database} to ${save_dest}"
   pg_dumpall "${connection[@]}" --globals-only | "${compression_cmd[@]}" | tee >(sha256sum > /tmp/sha.txt) > "${save_dest}"
-  awk "{print \$1 \"  ${database}.sql${file_ext[-1]}\"}" < /tmp/sha.txt | tee -a "${save_path}/CHECKSUMS"
+  awk "{print \$1 \"  ${database}.sql${file_ext[-1]}\"}" < /tmp/sha.txt | tee -a "${save_path}/CHECKSUM"
 fi
 
 # loop over and save the databases
@@ -176,7 +182,7 @@ for database in "${databases[@]}"; do
   save_dest="${save_path}${database}${final_ext}"
   echo ">> Saving ${database} to ${save_dest}"
   pg_dump "${connection[@]}" "${cmd_args[@]}" "${database}" | "${compression_cmd[@]}" | tee >(sha256sum > /tmp/sha.txt) > "${save_dest}"
-  awk "{print \$1 \"  ${database}${final_ext}\"}" < /tmp/sha.txt | tee -a "${save_path}/CHECKSUMS"
+  awk "{print \$1 \"  ${database}${final_ext}\"}" < /tmp/sha.txt | tee -a "${save_path}/CHECKSUM"
 done
 
 # Do the upload

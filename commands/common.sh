@@ -92,7 +92,7 @@ parse_options() {
           shift 2
           ;;
         -U|--username)
-          user="${2}"
+          username="${2}"
           shift 2
           ;;
         -d|--dbname)
