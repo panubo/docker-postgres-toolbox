@@ -147,7 +147,7 @@ parse_options() {
 
     # Setup connection string
     connection=()
-    for item in host port user dbname; do
+    for item in host port username dbname; do
         if [[ -n "${!item:-}" ]]; then
           connection+=("--${item}" "${!item}")
         fi
