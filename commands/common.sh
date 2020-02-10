@@ -75,7 +75,7 @@ parse_options() {
 
     # Options and long options
     local options="h:p:U:d:W:"
-    local longopts="host:,port:,username:,dbname:,password:,password-file:,no-create-database,no-revoke-public-create,drop-database,format:,compression:,skip-globals"
+    local longopts="host:,port:,username:,dbname:,password:,password-file:,no-create-database,no-revoke-public-create,drop-database,format:,compression:,skip-globals,skip-database:"
     local parsed
 
     # Parse with getopt (not getopts)
@@ -105,6 +105,10 @@ parse_options() {
           ;;
         --password-file)
           password_file="${2}"
+          shift 2
+          ;;
+        --skip-database)
+          skip_databases+=( "${2}" )
           shift 2
           ;;
         --no-create-database)

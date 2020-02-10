@@ -146,7 +146,9 @@ final_ext="$(printf "%s" "${file_ext[@]}")"
 wait_postgres
 
 # Saving a list of all databases as an array
-mapfile -t all_databases < <( /usr/bin/psql "${connection[@]}" -At -c "SELECT datname FROM pg_database WHERE NOT datistemplate" )
+# echo "${skip_databases[@]}"
+skip_dbs="$(printf "'%s', " "${skip_databases[@]}")"
+mapfile -t all_databases < <( /usr/bin/psql "${connection[@]}" -At -c "SELECT datname FROM pg_database WHERE NOT datistemplate AND datname NOT IN (${skip_dbs} '')" )
 
 echo "All databases:"
 echo "${all_databases[*]}"
@@ -161,7 +163,7 @@ fi
 echo "Databases to dump: ${#databases[@]}"
 echo "${databases[*]}"
 
-if [[ "${databases[*]}" < 1 ]]; then
+if [[ "${#databases[@]}" -lt 1 ]]; then
   echo ">> ERROR: no databases to dump but we expected some"
   exit 1
 fi
