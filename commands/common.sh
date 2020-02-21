@@ -75,7 +75,7 @@ parse_options() {
 
     # Options and long options
     local options="h:p:U:d:W:"
-    local longopts="host:,port:,username:,dbname:,password:,password-file:,no-create-database,no-revoke-public-create,drop-database,format:,compression:,skip-globals,skip-database:"
+    local longopts="host:,port:,username:,dbname:,password:,password-file:,no-create-database,no-revoke-public-create,drop-database,format:,compression:,skip-globals,skip-database:,skip-analyze,full-count"
     local parsed
 
     # Parse with getopt (not getopts)
@@ -133,6 +133,14 @@ parse_options() {
           ;;
         --skip-globals)
           skip_globals="true"
+          shift
+          ;;
+        --skip-analyze)
+          skip_analyze="true"
+          shift
+          ;;
+        --full-count)
+          full_count="true"
           shift
           ;;
         --)

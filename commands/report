@@ -17,7 +17,7 @@ parse_options "${@}"
 PSQL=( "/usr/bin/psql" "${connection[@]}" "-P" "pager=off" )
 
 if [[ -n "${args[0]:-}" ]]; then
-	PSQL+=( "--dbname" "${args[0]}" )
+    PSQL+=( "--dbname" "${args[0]}" )
 fi
 
 args_string="${args[*]}"
@@ -26,8 +26,10 @@ echoerr ">>> Args: ${args_string//$'\n'/ }"
 psql_string="${PSQL[*]}"
 echoerr ">>> psql: ${psql_string//$'\n'/ }"
 
-echoerr ">> Run ANALYZE"
-"${PSQL[@]}" --command 'ANALYZE VERBOSE' >&2
+if [[ "${skip_analyze:-}" != "true" ]]; then
+    echoerr ">> Run ANALYZE"
+    "${PSQL[@]}" --command 'ANALYZE VERBOSE' >&2
+fi
 
 # Exit immediately is turned off since we want the report complete even if there are errors
 set +e
@@ -79,35 +81,35 @@ echo
 echo ">> Count schema objects"
 # Originally from https://www.dbrnd.com/2017/06/postgresql-script-to-find-the-count-of-objects-for-each-database-schema/
 "${PSQL[@]}" --command 'SELECT
-	n.nspname as schema_name
-	,CASE c.relkind
-	   WHEN '"'"'r'"'"' THEN '"'"'table'"'"'
-	   WHEN '"'"'v'"'"' THEN '"'"'view'"'"'
-	   WHEN '"'"'i'"'"' THEN '"'"'index'"'"'
-	   WHEN '"'"'S'"'"' THEN '"'"'sequence'"'"'
-	   WHEN '"'"'s'"'"' THEN '"'"'special'"'"'
-	END as object_type
-	,count(1) as object_count
+    n.nspname as schema_name
+    ,CASE c.relkind
+       WHEN '"'"'r'"'"' THEN '"'"'table'"'"'
+       WHEN '"'"'v'"'"' THEN '"'"'view'"'"'
+       WHEN '"'"'i'"'"' THEN '"'"'index'"'"'
+       WHEN '"'"'S'"'"' THEN '"'"'sequence'"'"'
+       WHEN '"'"'s'"'"' THEN '"'"'special'"'"'
+    END as object_type
+    ,count(1) as object_count
 FROM pg_catalog.pg_class c
 LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
 WHERE c.relkind IN ('"'"'r'"'"','"'"'v'"'"','"'"'i'"'"','"'"'S'"'"','"'"'s'"'"')
 AND n.nspname NOT IN ('"'"'pg_catalog'"'"', '"'"'information_schema'"'"')
 GROUP BY  n.nspname,
-	CASE c.relkind
-	   WHEN '"'"'r'"'"' THEN '"'"'table'"'"'
-	   WHEN '"'"'v'"'"' THEN '"'"'view'"'"'
-	   WHEN '"'"'i'"'"' THEN '"'"'index'"'"'
-	   WHEN '"'"'S'"'"' THEN '"'"'sequence'"'"'
-	   WHEN '"'"'s'"'"' THEN '"'"'special'"'"'
-	END
+    CASE c.relkind
+       WHEN '"'"'r'"'"' THEN '"'"'table'"'"'
+       WHEN '"'"'v'"'"' THEN '"'"'view'"'"'
+       WHEN '"'"'i'"'"' THEN '"'"'index'"'"'
+       WHEN '"'"'S'"'"' THEN '"'"'sequence'"'"'
+       WHEN '"'"'s'"'"' THEN '"'"'special'"'"'
+    END
 ORDER BY n.nspname,
-	CASE c.relkind
-	   WHEN '"'"'r'"'"' THEN '"'"'table'"'"'
-	   WHEN '"'"'v'"'"' THEN '"'"'view'"'"'
-	   WHEN '"'"'i'"'"' THEN '"'"'index'"'"'
-	   WHEN '"'"'S'"'"' THEN '"'"'sequence'"'"'
-	   WHEN '"'"'s'"'"' THEN '"'"'special'"'"'
-	END;'
+    CASE c.relkind
+       WHEN '"'"'r'"'"' THEN '"'"'table'"'"'
+       WHEN '"'"'v'"'"' THEN '"'"'view'"'"'
+       WHEN '"'"'i'"'"' THEN '"'"'index'"'"'
+       WHEN '"'"'S'"'"' THEN '"'"'sequence'"'"'
+       WHEN '"'"'s'"'"' THEN '"'"'special'"'"'
+    END;'
 echo
 
 echo ">> Schema tables inc owner (table ACLs not reported)"
@@ -120,17 +122,32 @@ FROM pg_catalog.pg_class c
 JOIN pg_catalog.pg_namespace n on (c.relnamespace = n.oid)
 JOIN pg_catalog.pg_user u on (c.relowner = u.usesysid)
 WHERE n.nspname NOT IN ('"'"'information_schema'"'"', '"'"'pg_catalog'"'"')
-AND c.relkind = '"'"'r'"'"''
+AND c.relkind = '"'"'r'"'"'
+ORDER BY n.nspname, c.relname'
+
+if [[ "${full_count:-}" == "true" ]]; then
+  TABLES="$("${PSQL[@]}" -A -t --command 'SELECT schemaname || '"'"'.'"'"' || tablename
+  FROM pg_catalog.pg_tables 
+  WHERE schemaname NOT IN ('"'"'information_schema'"'"', '"'"'pg_catalog'"'"') 
+  ORDER BY schemaname, tablename')"
+
+  for table in ${TABLES}; do
+    echo -n "${table} "
+    "${PSQL[@]}" -A -t --command 'SELECT count(*) FROM '"${table}"
+  done
+  echo
+fi
 
 echo ">> Extensions"
 "${PSQL[@]}" --command 'SELECT e.extname, e.extversion, u.usename, n.nspname
 FROM pg_catalog.pg_extension e
 JOIN pg_catalog.pg_user u on (e.extowner = u.usesysid)
 JOIN pg_catalog.pg_namespace n on (e.extnamespace = n.oid)
-WHERE n.nspname NOT IN ('"'"'pg_catalog'"'"', '"'"'information_schema'"'"')'
+WHERE n.nspname NOT IN ('"'"'pg_catalog'"'"', '"'"'information_schema'"'"')
+ORDER BY n.nspname, e.extname, e.extversion, u.usename'
 
 echo ">> Indexes"
-"${PSQL[@]}" --command 'SELECT tn.nspname as table_schema, t.relname as table, c.relname, n.nspname, u.usename, c.relpages, i.indnatts, i.indisunique, i.indisprimary
+"${PSQL[@]}" --command 'SELECT tn.nspname as schema, t.relname as table, c.relname, c.relpages, i.indnatts as natts, i.indisunique as isunique, i.indisprimary as isprim, u.usename
 FROM pg_catalog.pg_class c
 JOIN pg_catalog.pg_namespace n on (c.relnamespace = n.oid)
 JOIN pg_catalog.pg_user u on (c.relowner = u.usesysid)
@@ -142,12 +159,3 @@ AND c.relkind = '"'"'i'"'"'
 ORDER BY tn.nspname, t.relname, n.nspname, c.relname'
 
 exit
-# Get tables for loops
-# TABLES="$("${PSQL[@]}" -A -t --command 'SELECT schemaname || '"'"'.'"'"' || tablename
-# FROM pg_catalog.pg_tables 
-# WHERE schemaname NOT IN ('"'"'information_schema'"'"', '"'"'pg_catalog'"'"') 
-# ORDER BY schemaname, tablename')"
-
-# for table in ${TABLES}; do
-#   echo "Counting ${table}"
-# done

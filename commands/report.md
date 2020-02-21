@@ -17,4 +17,7 @@ The report script runs a report on common config and object within a database. I
 
 ```
 docker run --rm -it panubo/postgres-toolbox:latest report -h 172.18.0.2 -W password -U myapp mydatabase
+
+# diff
+diff -y -W $COLUMNS before.txt after.txt
 ```

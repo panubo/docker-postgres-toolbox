@@ -61,7 +61,7 @@ case "${dest}" in
         ;;
     s3://*)
         echo ">> aws s3"
-        save_cmd=( "aws" "s3" "sync" )
+        save_cmd=( "aws" "s3" "sync" "--no-progress" )
         dest_type="s3"
         ;;
     file://*|/*|./*)
@@ -128,7 +128,9 @@ case "${compression:-gzip}" in
     esac
 
 # Create a temporary save path
-save_path="$(mktemp -p /var/tmp -d)/"
+# mkdir uses TMPDIR, if unset set to /var/tmp since /tmp is normally in memory and could be too small for a big database
+TMPDIR="${TMPDIR:-/var/tmp}"
+save_path="$(mktemp -d)/"
 
 # Setup the final path to pass to the save cmd
 full_path="$(printf "%s/" "${file_path[@]}")"
