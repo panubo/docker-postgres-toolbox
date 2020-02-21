@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Wrapper around vacuumdb script
+
+set -euo pipefail
+IFS=$'\n\t'
+
+[[ "${DEBUG:-}" == 'true' ]] && set -x
+
+# shellcheck source=commands/common.sh
+. "$(dirname "${0}")/common.sh"
+
+parse_options "${@}"
+
+connection_string="${connection[*]}"
+echoerr ">>> Connection: ${connection_string//$'\n'/ }"
+args_string="${args[*]}"
+echoerr ">>> Args: ${args_string//$'\n'/ }"
+
+exec /usr/bin/vacuumdb "${connection[@]}" "${args[@]}"

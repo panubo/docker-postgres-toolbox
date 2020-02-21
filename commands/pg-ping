@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+[[ "${DEBUG:-}" == 'true' ]] && set -x
+
+# shellcheck source=commands/common.sh
+. "$(dirname "${0}")/common.sh"
+
+parse_options "${@}"
+
+
+
+# Saving a list of all databases as an array
+# echo "${skip_databases[@]}"
+skip_dbs="$(printf "'%s', " "${skip_databases[@]}")"
+
+while true; do
+    echo "$(date) Fetching databases"
+    mapfile -t all_databases < <( /usr/bin/psql "${connection[@]}" -At -c "SELECT datname FROM pg_database WHERE NOT datistemplate AND datname NOT IN (${skip_dbs} '')" )
+    for item in "${all_databases[@]}"; do
+        echo -n "$(date) Ping ${item} "
+        /usr/bin/psql "${connection[@]}" -At -c 'SELECT 1' "${item}" || true
+    done
+    sleep 1
+done
+
+
+# connection_string="${connection[*]}"
+# echoerr ">>> Connection: ${connection_string//$'\n'/ }"
+# args_string="${args[*]}"
+# echoerr ">>> Args: ${args_string//$'\n'/ }"
+
+# exec /usr/bin/psql "${connection[@]}" "${args[@]}"
