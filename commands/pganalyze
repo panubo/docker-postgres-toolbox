@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+[[ "${DEBUG:-}" == 'true' ]] && set -x
+
+# shellcheck source=commands/common.sh
+. "$(dirname "${0}")/common.sh"
+
+parse_options "${@}"
+
+# Saving a list of all databases as an array
+# echo "${skip_databases[@]}"
+skip_dbs="$(printf "'%s', " "${skip_databases[@]}")"
+
+# Setup connection string
+analyze_connection=()
+for item in host port username; do
+    if [[ -n "${!item:-}" ]]; then
+      analyze_connection+=("--${item}" "${!item}")
+    fi
+done
+
+echo "$(date) Fetching databases"
+mapfile -t all_databases < <( /usr/bin/psql "${connection[@]}" -At -c "SELECT datname FROM pg_database WHERE NOT datistemplate AND datname NOT IN (${skip_dbs} '') ORDER BY datname" )
+for item in "${all_databases[@]}"; do
+    echo "$(date) ANALYZE ${item} "
+    /usr/bin/psql "${analyze_connection[@]}" -At -c 'ANALYZE VERBOSE' "${item}"
+done
