@@ -52,3 +52,9 @@ docker run -t -i --name ${TEST_NAME}-delete --link postgres $TEST_CONTAINER dele
 docker run -t -i --name ${TEST_NAME}-create2 --link postgres $TEST_CONTAINER create-user-db foo
 docker run -t -i --name ${TEST_NAME}-load --link postgres -e DUMP_DIR="/srv" -v /srv:/srv $TEST_CONTAINER load foo
 cleanup postgres ${TEST_NAME}-create1 ${TEST_NAME}-save ${TEST_NAME}-delete ${TEST_NAME}-load ${TEST_NAME}-create2
+
+echo "===> Test fix-owner command"
+docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=password postgres:$POSTGRES_VERSION > /dev/null
+sleep 5
+docker run -t -i --name ${TEST_NAME}-create --link postgres $TEST_CONTAINER create-user-db foo
+docker run -t -i --name ${TEST_NAME}-fix --link postgres $TEST_CONTAINER fix-owner foo

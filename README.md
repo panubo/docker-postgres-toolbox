@@ -13,6 +13,7 @@ Documentation for each subcommand:
 - [create-readonly-user](commands/create-readonly-user.md)
 - [save](commands/save.md)
 - [load](commands/load.md)
+- [fix-owner](commands/fix-owner.md)
 - [vacuum](commands/vacuum.md)
 - [psql](commands/psql.md)
 
