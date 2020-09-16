@@ -16,6 +16,8 @@ cat << EOF
 
      load <databases>
 
+     fix-owner <databases>
+
      psql - start a PostgreSQL client session
 
      vacuum <databases>
