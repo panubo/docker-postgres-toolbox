@@ -4,18 +4,20 @@
 
 A collection of PostgreSQL scripts for automating common DBA tasks in a Docker-centric way.
 
+Wherever possible the commands are compatible with Amazon RDS and GCP Cloud SQL.
+
 ## Documentation
 
 Documentation for each subcommand:
 
+- [create-readonly-user](commands/create-readonly-user.md)
 - [create-user-db](commands/create-user-db.md)
 - [delete-user-db](commands/delete-user-db.md)
-- [create-readonly-user](commands/create-readonly-user.md)
-- [save](commands/save.md)
-- [load](commands/load.md)
 - [fix-owner](commands/fix-owner.md)
-- [vacuum](commands/vacuum.md)
+- [load](commands/load.md)
 - [psql](commands/psql.md)
+- [save](commands/save.md)
+- [vacuum](commands/vacuum.md)
 
 ## General Usage
 
@@ -42,4 +44,4 @@ Some subcommands require additional environment parameters.
 
 ## Status
 
-Feature incomplete. Work in progress.
+Stable.
