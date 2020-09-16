@@ -1,0 +1,4 @@
+.circleci
+.git
+.dockerignore
+README.md
