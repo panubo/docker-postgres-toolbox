@@ -1,5 +1,5 @@
-NAME = postgres-toolbox
-TAG = latest
+NAME       := postgres-toolbox
+TAG        := `git describe --long --tags --dirty --always`
 IMAGE_NAME := panubo/$(NAME)
 
 .PHONY: help build test clean push
@@ -17,4 +17,8 @@ clean: ## Remove built image
 	docker rmi $(IMAGE_NAME):$(TAG)
 
 push: ## Pushes the docker image to hub.docker.com
+	# Don't --pull here, we don't want any last minute upsteam changes
+	docker build -t $(IMAGE_NAME):$(TAG) .
+	docker tag $(IMAGE_NAME):$(TAG) $(IMAGE_NAME):latest
 	docker push $(IMAGE_NAME):$(TAG)
+	docker push $(IMAGE_NAME):latest
