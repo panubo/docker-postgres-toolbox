@@ -23,8 +23,8 @@ Or alternatively specify the individual variables:
 
 Create `foo` user with read-only privileges to the public schema in a database with the same name:
 
-```docker run --rm -i -t -e DATABASE_HOST=172.19.66.4 -e DATABASE_USER=root -e DATABASE_PASS=foo docker.io/panubo/postgres-toolbox create-readonly-user foodb foouser foopass```
+```docker run --rm -i -t -e DATABASE_HOST=172.19.66.4 -e DATABASE_USER=root -e DATABASE_PASS=foo docker.io/panubo/postgres-toolbox:1.0.0 create-readonly-user foodb foouser foopass```
 
 Using Docker links to `postgres` container:
 
-```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox create-readonly-user foodb foouser foopass```
+```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox:1.0.0 create-readonly-user foodb foouser foopass```

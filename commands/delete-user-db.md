@@ -22,8 +22,8 @@ Or alternatively specify the individual variables:
 
 Delete `foo` user and database with the same name:
 
-```docker run --rm -i -t -e DATABASE_HOST=172.19.66.4 -e DATABASE_USER=root -e DATABASE_PASS=foo docker.io/panubo/postgres-toolbox delete-user-db foo```
+```docker run --rm -i -t -e DATABASE_HOST=172.19.66.4 -e DATABASE_USER=root -e DATABASE_PASS=foo docker.io/panubo/postgres-toolbox:1.0.0 delete-user-db foo```
 
 Using Docker links to `postgres` container:
 
-```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox delete-user-db foo```
+```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox:1.0.0 delete-user-db foo```

@@ -21,11 +21,11 @@ Documentation for each subcommand:
 
 Using Docker links to `postgres` container. This will display the usage information:
 
-```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox```
+```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox:1.0.0```
 
 To run the subcommand:
 
-```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox <subcommand>```
+```docker run --rm -i -t --link myserver:postgres docker.io/panubo/postgres-toolbox:1.0.0 <subcommand>```
 
 ## Configuration
 
