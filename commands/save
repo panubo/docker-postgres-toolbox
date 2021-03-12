@@ -48,7 +48,7 @@ fi
 dest="${args[-1]}"
 unset "args[-1]"
 
-# Set the umask, umask defaults to 0077 to keep files private during db dumping 
+# Set the umask, umask defaults to 0077 to keep files private during db dumping
 umask "${umask:-0077}"
 
 date="$(date --utc "+${date_format:-%Y%m%d%H%M%S}")"
@@ -173,7 +173,7 @@ fi
 # Save the postgres globals - always sql format
 # TODO: this could do with a clean up
 if [[ "${skip_globals:-}" != "true" ]]; then
-  database="gloabls"
+  database="globals"
   # TODO: this may break is compression none is used
   save_dest="${save_path}${database}.sql${file_ext[-1]}"
   echo ">> Saving ${database} to ${save_dest}"
