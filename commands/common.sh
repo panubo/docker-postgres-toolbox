@@ -40,7 +40,7 @@ global_options() {
 
 parse_options() {
     # Function parses the following options from both the command line and environment variables
-    # Command line options take precedence and if neither is set commands should fall back to 
+    # Command line options take precedence and if neither is set commands should fall back to
     # default postgres environment variables.
 
     # Connection options
@@ -161,7 +161,7 @@ parse_options() {
     connection=()
     for item in host port username dbname; do
         if [[ -n "${!item:-}" ]]; then
-          connection+=("--${item}" "${!item}")
+          connection+=("--${item}=${!item}")
         fi
     done
 
@@ -170,7 +170,7 @@ parse_options() {
         # Read password file if set on the command line or DATABASE_PASSWORD_FILE
         password="$(cat "${password_file}")"
     fi
- 
+
     # If the password was set write it to .pgpass (or save a temporary file and set PGPASSFILE)
     if [[ -n "${password:-}" ]]; then
         local old_umask
