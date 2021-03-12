@@ -1,7 +1,7 @@
 NAME       := postgres-toolbox
 TAG        := latest
 IMAGE_NAME := panubo/$(NAME)
-BETA_VERSION := 2.3.0-beta.2
+BETA_VERSION := 2.3.0-beta.3
 
 .PHONY: build test push clean
 build:
