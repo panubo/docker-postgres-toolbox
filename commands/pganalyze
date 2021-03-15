@@ -14,17 +14,9 @@ parse_options "${@}"
 # echo "${skip_databases[@]}"
 skip_dbs="$(printf "'%s', " "${skip_databases[@]}")"
 
-# Setup connection string
-analyze_connection=()
-for item in host port username; do
-    if [[ -n "${!item:-}" ]]; then
-      analyze_connection+=("--${item}" "${!item}")
-    fi
-done
-
 echo "$(date) Fetching databases"
 mapfile -t all_databases < <( /usr/bin/psql "${connection[@]}" -At -c "SELECT datname FROM pg_database WHERE NOT datistemplate AND datname NOT IN (${skip_dbs} '') ORDER BY datname" )
 for item in "${all_databases[@]}"; do
     echo "$(date) ANALYZE ${item} "
-    /usr/bin/psql "${analyze_connection[@]}" -At -c 'ANALYZE VERBOSE' "${item}"
+    /usr/bin/psql "${connection_no_dbname[@]}" -At -c 'ANALYZE VERBOSE' "${item}"
 done

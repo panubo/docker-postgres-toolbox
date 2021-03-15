@@ -154,16 +154,24 @@ parse_options() {
       esac
     done
 
-    # Set remaining command line arguments into an array
-    args=( "$@" )
-
-    # Setup connection string
+    # Setup connection string (common)
     connection=()
     for item in host port username dbname; do
         if [[ -n "${!item:-}" ]]; then
           connection+=("--${item}=${!item}")
         fi
     done
+
+    # Setup connection string (analyze, pg_dump, vacuum)
+    connection_no_dbname=()
+    for item in host port username; do
+        if [[ -n "${!item:-}" ]]; then
+          connection_no_dbname+=("--${item}=${!item}")
+        fi
+    done
+
+    # Set remaining command line arguments into an array
+    args=( "$@" )
 
     # Read in the password file if set
     if [[ -n "${password_file:-}" ]]; then

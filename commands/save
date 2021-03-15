@@ -185,7 +185,7 @@ fi
 for database in "${databases[@]}"; do
   save_dest="${save_path}${database}${final_ext}"
   echo ">> Saving ${database} to ${save_dest}"
-  pg_dump "${connection[@]}" "${cmd_args[@]}" "${database}" | "${compression_cmd[@]}" | tee >(sha256sum > /tmp/sha.txt) > "${save_dest}"
+  pg_dump "${connection_no_dbname[@]}" "${cmd_args[@]}" "${database}" | "${compression_cmd[@]}" | tee >(sha256sum > /tmp/sha.txt) > "${save_dest}"
   awk "{print \$1 \"  ${database}${final_ext}\"}" < /tmp/sha.txt | tee -a "${save_path}/CHECKSUM"
 done
 

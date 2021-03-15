@@ -11,9 +11,9 @@ IFS=$'\n\t'
 
 parse_options "${@}"
 
-connection_string="${connection[*]}"
+connection_string="${connection_no_dbname[*]}"
 echoerr ">>> Connection: ${connection_string//$'\n'/ }"
 args_string="${args[*]}"
 echoerr ">>> Args: ${args_string//$'\n'/ }"
 
-exec /usr/bin/vacuumdb "${connection[@]}" "${args[@]}"
+exec /usr/bin/vacuumdb "${connection_no_dbname[@]}" "${args[@]}"

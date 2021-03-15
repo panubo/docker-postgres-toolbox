@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs a series of queries against a database to compare two server
+# Runs a series of queries against a database to compare two servers
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -60,7 +60,7 @@ echo
 
 echo ">> Database owner"
 "${PSQL[@]}" --command 'SELECT u.usename, d.encoding, d.datcollate, d.datctype, d.datacl
-FROM pg_catalog.pg_database d 
+FROM pg_catalog.pg_database d
 JOIN pg_catalog.pg_user u on (d.datdba = u.usesysid)
 WHERE d.datname = current_database()'
 echo
@@ -127,8 +127,8 @@ ORDER BY n.nspname, c.relname'
 
 if [[ "${full_count:-}" == "true" ]]; then
   TABLES="$("${PSQL[@]}" -A -t --command 'SELECT schemaname || '"'"'.'"'"' || tablename
-  FROM pg_catalog.pg_tables 
-  WHERE schemaname NOT IN ('"'"'information_schema'"'"', '"'"'pg_catalog'"'"') 
+  FROM pg_catalog.pg_tables
+  WHERE schemaname NOT IN ('"'"'information_schema'"'"', '"'"'pg_catalog'"'"')
   ORDER BY schemaname, tablename')"
 
   for table in ${TABLES}; do
