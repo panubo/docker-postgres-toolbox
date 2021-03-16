@@ -8,16 +8,20 @@ cat << EOF
 
   Please choose a command:
 
-     create-user-db <username> <password>
+     create-user-db
 
-     delete-user-db <username>
+     drop-user-db
 
-     save <databases>
+     pg-ping
 
-     load <databases>
+     pganalyze
 
-     psql - start a PostgreSQL client session
+     psql
 
-     vacuum <databases>
+     report
+
+     save
+
+     vacuumdb
 
 EOF
