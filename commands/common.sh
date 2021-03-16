@@ -36,6 +36,7 @@ global_options() {
     echoerr "    -d|--dbname    database to connect to"
     echoerr "    -W|--password    password to connection to (not recommended. Use password-file)"
     echoerr "    --password-file    password file to read password from"
+    echoerr "    --skip-database    databases to skip"
 }
 
 parse_options() {
@@ -68,6 +69,16 @@ parse_options() {
     for item in host port username dbname password password_file no_create_database no_revoke_public_create drop_database; do
         local varname
         varname="DATABASE_${item^^}"
+        if [[ -n "${!varname:-}" ]]; then
+          eval ${item}="${!varname}"
+        fi
+    done
+
+    # Pull in environment variables prefixed with TOOLBOX_
+    # TOOLBOX_SKIP_DATABASES should be comma separated
+    for item in skip_databases; do
+        local varname
+        varname="TOOLBOX_${item^^}"
         if [[ -n "${!varname:-}" ]]; then
           eval ${item}="${!varname}"
         fi
@@ -189,6 +200,11 @@ parse_options() {
         echo "*:*:*:*:${password}" > "${PGPASSFILE}"
         umask "${old_umask}"
         echoerr ">>> Password written to ${PGPASSFILE}"
+    fi
+
+    # If skip_databases was set, split into an array
+    if [[ -n "${skip_databases:-}" ]]; then
+        IFS=',' read -r -a skip_databases <<< "${skip_databases}"
     fi
 }
 
