@@ -31,22 +31,39 @@ RUN set -x \
   && apk del ${fetchDeps} \
   ;
 
-ENV \
-  GSUTIL_VERSION=4.46 \
-  GSUTIL_CHECKSUM=bb319cc49d74cf12b692748d498abc63e6098750fb6e36cff71eebf71ec895e0 \
-  CLOUDSDK_GSUTIL_PYTHON=python3 \
-  CLOUDSDK_PYTHON=python3
+# ENV \
+#   GSUTIL_VERSION=4.46 \
+#   GSUTIL_CHECKSUM=bb319cc49d74cf12b692748d498abc63e6098750fb6e36cff71eebf71ec895e0 \
+#   CLOUDSDK_GSUTIL_PYTHON=python3 \
+#   CLOUDSDK_PYTHON=python3
+#
+# # Install gsutil
+# RUN set -x \
+#   && mkdir -p /opt \
+#   && curl -o /tmp/gsutil_${GSUTIL_VERSION}.tar.gz "https://storage.googleapis.com/pub/gsutil_${GSUTIL_VERSION}.tar.gz" \
+#   && echo "${GSUTIL_CHECKSUM}  gsutil_${GSUTIL_VERSION}.tar.gz" > /tmp/SHA256SUM \
+#   && ( cd /tmp; sha256sum -c SHA256SUM; ) \
+#   && tar -C /opt -zxf /tmp/gsutil_${GSUTIL_VERSION}.tar.gz \
+#   && ln -s /opt/gsutil/gsutil /usr/local/bin/gsutil \
+#   && rm -f /tmp/* \
+#   && find /opt ! -group 0 -exec chgrp -h 0 {} \; \
+#   ;
 
-# Install gsutil
+# Install Gcloud SDK (required for gsutil workload identity authentication)
+ENV \
+  GCLOUD_VERSION=331.0.0 \
+  GCLOUD_CHECKSUM=f90c2df5bd0b3498d7e33112f17439eead8c94ae7d60a1cab0091de0eee62c16
+
 RUN set -x \
-  && mkdir -p /opt \
-  && curl -o /tmp/gsutil_${GSUTIL_VERSION}.tar.gz "https://storage.googleapis.com/pub/gsutil_${GSUTIL_VERSION}.tar.gz" \
-  && echo "${GSUTIL_CHECKSUM}  gsutil_${GSUTIL_VERSION}.tar.gz" > /tmp/SHA256SUM \
-  && ( cd /tmp; sha256sum -c SHA256SUM; ) \
-  && tar -C /opt -zxf /tmp/gsutil_${GSUTIL_VERSION}.tar.gz \
-  && ln -s /opt/gsutil/gsutil /usr/local/bin/gsutil \
-  && rm -f /tmp/* \
-  && find /opt ! -group 0 -exec chgrp -h 0 {} \; \
+  && apk --no-cache add python3 \
+  && curl -o /tmp/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz -L https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz \
+  && echo "${GCLOUD_CHECKSUM}  google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz" > /tmp/SHA256SUM \
+  && ( cd /tmp; sha256sum -c SHA256SUM || ( echo "Expected $(sha256sum google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz)"; exit 1; )) \
+  && tar -C / -zxvf /tmp/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz ;
+  && /google-cloud-sdk/install.sh --quiet \
+  && ln -s /google-cloud-sdk/bin/gcloud /usr/local/bin/ \
+  && ln -s /google-cloud-sdk/bin/gsutil /usr/local/bin/ \
+  && rm -rf /tmp/* /root/.config/gcloud \
   ;
 
 ENV \
