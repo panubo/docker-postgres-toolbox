@@ -33,8 +33,7 @@ wait_postgres
 
 # Is this a bad idea?
 # Required for the GRANT below
-current_user="${user:-${PGUSER:-${USER}}}"
-
+current_user="${username:-${PGUSER:-${USER}}}"
 
 echoerr ">>> Creating new user (ROLE)"
 # Check is new user already exists
@@ -44,7 +43,7 @@ if [[ "$(/usr/bin/psql "${connection[@]}" -tAc "SELECT 1 FROM pg_roles WHERE rol
         new_password="$(genpasswd)"
         echoerr ">>> Generated a random password: ${new_password}"
     else
-        new_password="${args[2]}"
+        new_password="${args[1]}"
     fi
     /usr/bin/psql "${connection[@]}" -c "CREATE ROLE ${new_user} WITH LOGIN PASSWORD '${new_password}';"
 else
@@ -70,9 +69,9 @@ else
     # shellcheck disable=SC2034
     dbname="${new_user}"
     connection=()
-    for item in host port user dbname; do
+    for item in host port username dbname; do
         if [[ -n "${!item:-}" ]]; then
-            connection+=("--${item}" "${!item}")
+          connection+=("--${item}=${!item}")
         fi
     done
 
