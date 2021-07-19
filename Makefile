@@ -11,7 +11,7 @@ build-quick:
 	docker build -t $(IMAGE_NAME):$(TAG) .
 
 test:
-	./tests/dind-runner.sh
+	bats -r tests/
 
 push:
 	docker push $(IMAGE_NAME):$(TAG)
