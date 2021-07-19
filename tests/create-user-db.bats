@@ -16,6 +16,8 @@ load test_functions.bash
 		panubo/postgres-toolbox psql -- -c 'SELECT current_database();'
 	diag "${output}"
 	[[ "${status}" -eq 0 ]]
+	# check the output of the second last line
+	[[ "${lines[-2]}" = " myuser" ]]
 }
 
 # echo "===> Test create-user-db command"

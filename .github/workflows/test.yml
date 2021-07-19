@@ -21,7 +21,7 @@ jobs:
 
       - name: Build image
         run: |
-          make build
+          make build-with-cache
 
       - name: Tests
         run: |
