@@ -10,22 +10,16 @@ RUN set -x \
 
 # Install Panubo bash-container
 RUN set -x \
-  && BASHCONTAINER_VERSION=0.6.0 \
+  && BASHCONTAINER_VERSION=0.7.0 \
+  && BASHCONTAINER_SHA256=45065b105614543b7775131728dbdf680586f553163240e4dd7226f03a35d4fa \
   && if [ -n "$(readlink /usr/bin/wget)" ]; then \
       fetchDeps="${fetchDeps} wget"; \
-     fi \
-  && if ! command -v gpg > /dev/null; then \
-      fetchDeps="${fetchDeps} gnupg"; \
      fi \
   && apk add --no-cache ca-certificates bash curl coreutils ${fetchDeps} \
   && cd /tmp \
   && wget -nv https://github.com/panubo/bash-container/releases/download/v${BASHCONTAINER_VERSION}/panubo-functions.tar.gz \
-  && wget -nv https://github.com/panubo/bash-container/releases/download/v${BASHCONTAINER_VERSION}/panubo-functions.tar.gz.asc \
-  && GPG_KEYS="E51A4070A3FFBD68C65DDB9D8BECEF8DFFCC60DD" \
-  && ( gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$GPG_KEYS" \
-      || gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$GPG_KEYS" \
-      || gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys "$GPG_KEYS" ) \
-  && gpg --batch --verify panubo-functions.tar.gz.asc panubo-functions.tar.gz  \
+  && echo "${BASHCONTAINER_SHA256}  panubo-functions.tar.gz" > /tmp/SHA256SUM \
+  && ( cd /tmp; sha256sum -c SHA256SUM || ( echo "Expected $(sha256sum panubo-functions.tar.gz)"; exit 1; )) \
   && tar -C / -zxf panubo-functions.tar.gz \
   && rm -rf /tmp/* \
   && apk del ${fetchDeps} \
