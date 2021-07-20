@@ -86,7 +86,7 @@ parse_options() {
 
     # Options and long options
     local options="h:p:U:d:W:"
-    local longopts="host:,port:,username:,dbname:,password:,password-file:,no-create-database,no-revoke-public-create,drop-database,format:,compression:,skip-globals,skip-database:,skip-analyze,full-count"
+    local longopts="host:,port:,username:,dbname:,password:,password-file:,no-create-database,no-revoke-public-create,drop-database,format:,compression:,umask:,skip-globals,skip-database:,skip-analyze,full-count,aws-args:"
     local parsed
 
     # Parse with getopt (not getopts)
@@ -138,6 +138,10 @@ parse_options() {
           format="${2}"
           shift 2
           ;;
+        --umask)
+          umask="${2}"
+          shift 2
+          ;;
         --compression)
           compression="${2}"
           shift 2
@@ -153,6 +157,10 @@ parse_options() {
         --full-count)
           full_count="true"
           shift
+          ;;
+        --aws-args)
+          IFS=$' \n\t' read -r -a aws_args <<<"${2}"
+          shift 2
           ;;
         --)
           shift

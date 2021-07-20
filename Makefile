@@ -10,8 +10,13 @@ build:
 build-quick:
 	docker build -t $(IMAGE_NAME):$(TAG) .
 
+build-with-cache:
+	# Used by CI to speed up build and test process
+	docker pull $(IMAGE_NAME):$(TAG)
+	docker build -t $(IMAGE_NAME):$(TAG) --cache-from $(IMAGE_NAME):$(TAG) .
+
 test:
-	./tests/dind-runner.sh
+	bats -r tests/
 
 push:
 	docker push $(IMAGE_NAME):$(TAG)

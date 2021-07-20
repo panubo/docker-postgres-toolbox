@@ -1,0 +1,28 @@
+on:
+  push:
+
+name: Run Tests
+
+jobs:
+  build:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Setup BATS
+        uses: mig4/setup-bats@v1
+        with:
+          bats-version: 1.3.0
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build image
+        run: |
+          make build-with-cache
+
+      - name: Tests
+        run: |
+          make test
