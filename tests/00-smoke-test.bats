@@ -1,4 +1,5 @@
 load test_functions.bash
+load standard_setup.bash
 
 @test "smoke test - select 1" {
 	run docker run --rm \
