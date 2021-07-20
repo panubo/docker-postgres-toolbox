@@ -28,6 +28,7 @@ usage() {
     echoerr ""
     echoerr "Options:"
     echoerr "    --pgdump-args    NOT IMPLEMENTED"
+    echoerr "    --aws-args    OPTIONS"
     echoerr "    --format    plain|custom"
     echoerr "    --compression    gzip|lz4|bz2|none"
     echoerr "    --date-format    %Y%m%d%H%M%S"
@@ -61,7 +62,7 @@ case "${dest}" in
         ;;
     s3://*)
         echo ">> aws s3"
-        save_cmd=( "aws" "s3" "sync" "--no-progress" )
+        save_cmd=( "aws" "${aws_args[@]}" "s3" "sync" "--no-progress" )
         dest_type="s3"
         ;;
     file://*|/*|./*)
@@ -195,6 +196,7 @@ if [[ "${dest_type}" == "file" ]]; then
     ls -l "${full_path}"
 else
     echo ">> Uploading to ${full_path}"
+    echoerr "${save_cmd[@]}" "${save_path}" "${full_path}"
     "${save_cmd[@]}" "${save_path}" "${full_path}"
 
     # Clean up the save path if successful and not a file type save
