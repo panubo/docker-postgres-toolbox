@@ -32,7 +32,7 @@ teardown_file() {
 		-e DATABASE_USERNAME=postgres \
 		-e DATABASE_PASSWORD=password \
 		-v "${working_volume}:/db-dumps" \
-		"${TOOLBOX_IMAGE}" save --umask 022 /db-dumps
+		"${TOOLBOX_IMAGE}" save --umask 022 --pgdump-args "--compress 0" --format custom /db-dumps
 	diag "${output}"
 	[[ "${status}" -eq 0 ]]
 }

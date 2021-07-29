@@ -27,7 +27,7 @@ usage() {
     global_options
     echoerr ""
     echoerr "Options:"
-    echoerr "    --pgdump-args    NOT IMPLEMENTED"
+    echoerr "    --pgdump-args    OPTIONS"
     echoerr "    --aws-args    OPTIONS"
     echoerr "    --format    plain|custom"
     echoerr "    --compression    gzip|lz4|bz2|none"
@@ -53,6 +53,9 @@ unset "args[-1]"
 umask "${umask:-0077}"
 
 date="$(date --utc "+${date_format:-%Y%m%d%H%M%S}")"
+# Undocumented feature to allow overriding the date.
+# Useful when using offloaded backup so the actual snapshot date can be used.
+date="${OVERRIDE_DATE:-${date}}"
 
 case "${dest}" in
     gs://*)
@@ -77,7 +80,7 @@ case "${dest}" in
         ;;
     esac
 
-cmd_args=()
+cmd_args=( "${pgdump_args[@]}" )
 file_ext=()
 file_path=( "${dest}" "${date}" )
 
