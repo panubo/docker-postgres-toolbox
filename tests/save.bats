@@ -31,6 +31,7 @@ teardown_file() {
 		-e DATABASE_HOST=${postgres_container_ip} \
 		-e DATABASE_USERNAME=postgres \
 		-e DATABASE_PASSWORD=password \
+		-e TOOLBOX_COMRESSION=lz4 \
 		-v "${working_volume}:/db-dumps" \
 		"${TOOLBOX_IMAGE}" save --umask 022 --pgdump-args "--compress 0" --format custom /db-dumps
 	diag "${output}"
@@ -42,9 +43,10 @@ teardown_file() {
 		-e DATABASE_HOST=${postgres_container_ip} \
 		-e DATABASE_USERNAME=postgres \
 		-e DATABASE_PASSWORD=password \
+		-e AWS_ARGS="--endpoint-url http://${minio_container_ip}:9000" \
 		-e AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE \
 		-e AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY \
-		"${TOOLBOX_IMAGE}" save --aws-args "--endpoint-url http://${minio_container_ip}:9000" --format custom --compression lz4 s3://db-dumps
+		"${TOOLBOX_IMAGE}" save --format custom --compression lz4 s3://db-dumps
 	diag "${output}"
 	[[ "${status}" -eq 0 ]]
 }

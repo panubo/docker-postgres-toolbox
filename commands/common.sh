@@ -76,11 +76,20 @@ parse_options() {
 
     # Pull in environment variables prefixed with TOOLBOX_
     # TOOLBOX_SKIP_DATABASES should be comma separated
-    for item in skip_databases; do
+    for item in skip_databases format compression umask; do
         local varname
         varname="TOOLBOX_${item^^}"
         if [[ -n "${!varname:-}" ]]; then
           eval ${item}="${!varname}"
+        fi
+    done
+
+    # Pull in *-args environment variables
+    for item in aws_args pgdump_args; do
+        local varname
+        varname="${item^^}"
+        if [[ -n "${!varname:-}" ]]; then
+          IFS=$' \n\t' eval read -r -a ${item} <<<"${!varname}"
         fi
     done
 
