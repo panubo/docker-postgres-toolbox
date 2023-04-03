@@ -23,6 +23,12 @@ jobs:
         run: |
           make build-with-cache
 
+      - name: Run shellcheck
+        run: |
+          sudo apt-get -y install shellcheck
+          make test
+
       - name: Tests
         run: |
+          make shellcheck
           make test
