@@ -1,7 +1,6 @@
 NAME       := postgres-toolbox
 TAG        := latest
 IMAGE_NAME := panubo/$(NAME)
-BETA_VERSION := 2.3.0-beta.3
 
 .PHONY: build test push clean
 build:
@@ -32,7 +31,3 @@ bash: .env
 
 shellcheck:
 	shellcheck commands/common.sh commands/create-user-db commands/drop-user-db commands/psql commands/report commands/save commands/pg-ping commands/vacuumdb commands/pganalyze
-
-beta:
-	docker tag panubo/postgres-toolbox:latest panubo/postgres-toolbox:$(BETA_VERSION)
-	docker push panubo/postgres-toolbox:$(BETA_VERSION)
