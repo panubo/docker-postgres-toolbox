@@ -1,7 +1,5 @@
 # PostgreSQL Toolbox
 
-[![Build Status](https://travis-ci.org/panubo/docker-postgres-toolbox.svg?branch=master)](https://travis-ci.org/panubo/docker-postgres-toolbox)
-
 A collection of PostgreSQL scripts for automating common DBA tasks in a Docker-centric way.
 
 ## Documentation
@@ -9,12 +7,13 @@ A collection of PostgreSQL scripts for automating common DBA tasks in a Docker-c
 Documentation for each subcommand:
 
 - [create-user-db](commands/create-user-db.md)
-- [delete-user-db](commands/delete-user-db.md)
-- [create-readonly-user](commands/create-readonly-user.md)
-- [save](commands/save.md)
-- [load](commands/load.md)
-- [vacuum](commands/vacuum.md)
+- [drop-user-db](commands/drop-user-db.md)
+- [pg-ping](commands/pg-ping.md)
+- [pganalyze](commands/pganalyze.md)
 - [psql](commands/psql.md)
+- [report](commands/report.md)
+- [save](commands/save.md)
+- [vacuum](commands/vacuum.md)
 
 ## General Usage
 
