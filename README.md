@@ -13,7 +13,7 @@ Documentation for each subcommand:
 - [psql](commands/psql.md)
 - [report](commands/report.md)
 - [save](commands/save.md)
-- [vacuum](commands/vacuum.md)
+- [vacuumdb](commands/vacuumdb.md)
 
 ## General Usage
 
