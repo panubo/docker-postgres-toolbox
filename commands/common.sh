@@ -225,6 +225,7 @@ parse_options() {
 
     # If skip_databases was set, split into an array
     if [[ -n "${skip_databases:-}" ]]; then
+        # shellcheck disable=SC2128
         IFS=',' read -r -a skip_databases <<< "${skip_databases}"
     fi
 }
