@@ -1,17 +1,16 @@
-FROM alpine:3.14
+FROM alpine:3.17
 
 # Install some tools
 # python is required for gsutil
 RUN set -x \
-  && apk add --update bash findutils postgresql-client gzip bzip2 lz4 xz unzip zip coreutils python3 rsync \
+  && apk add --update bash findutils postgresql-client gzip bzip2 lz4 xz unzip zip coreutils python3 rsync curl \
   && rm -rf /var/cache/apk/* \
-  && ln -s /usr/bin/python3 /usr/bin/python \
   ;
 
 # Install Panubo bash-container
 RUN set -x \
-  && BASHCONTAINER_VERSION=0.7.0 \
-  && BASHCONTAINER_SHA256=45065b105614543b7775131728dbdf680586f553163240e4dd7226f03a35d4fa \
+  && BASHCONTAINER_VERSION=0.7.2 \
+  && BASHCONTAINER_SHA256=87c4b804f0323d8f0856cb4fbf2f7859174765eccc8b0ac2d99b767cecdcf5c6 \
   && if [ -n "$(readlink /usr/bin/wget)" ]; then \
       fetchDeps="${fetchDeps} wget"; \
      fi \
@@ -20,7 +19,7 @@ RUN set -x \
   && wget -nv https://github.com/panubo/bash-container/releases/download/v${BASHCONTAINER_VERSION}/panubo-functions.tar.gz \
   && echo "${BASHCONTAINER_SHA256}  panubo-functions.tar.gz" > /tmp/SHA256SUM \
   && ( cd /tmp; sha256sum -c SHA256SUM || ( echo "Expected $(sha256sum panubo-functions.tar.gz)"; exit 1; )) \
-  && tar -C / -zxf panubo-functions.tar.gz \
+  && tar --no-same-owner -C / -zxf panubo-functions.tar.gz \
   && rm -rf /tmp/* \
   && apk del ${fetchDeps} \
   ;
@@ -45,8 +44,8 @@ RUN set -x \
 
 # Install Gcloud SDK (required for gsutil workload identity authentication)
 ENV \
-  GCLOUD_VERSION=331.0.0 \
-  GCLOUD_CHECKSUM=f90c2df5bd0b3498d7e33112f17439eead8c94ae7d60a1cab0091de0eee62c16
+  GCLOUD_VERSION=424.0.0 \
+  GCLOUD_CHECKSUM=1fed39626f23352e0f97623d5009ff1bb6c4ffd3875c85f4205f309292696b18
 
 RUN set -x \
   && apk --no-cache add python3 \
@@ -60,22 +59,24 @@ RUN set -x \
   && rm -rf /tmp/* /root/.config/gcloud \
   ;
 
+# Install AWS CLI
 ENV \
   PYTHONIOENCODING=UTF-8 \
   PYTHONUNBUFFERED=0 \
   PAGER=more \
-  AWS_CLI_VERSION=1.16.286 \
-  AWS_CLI_CHECKSUM=7e99ea733b3d97b1fa178fab08b5d7802d0647ad514c14221513c03ce920ce83
+  AWS_CLI_VERSION=1.27.103 \
+  AWS_CLI_CHECKSUM=0fed454146160807e273c4fd9bb1d0ba0926e3fb8ed3fc55e9251ebd2d53407c
 
 RUN set -x \
-  && apk add --no-cache ca-certificates wget \
+  && apk --update add --no-cache ca-certificates wget unzip \
   && cd /tmp \
   && wget -nv https://s3.amazonaws.com/aws-cli/awscli-bundle-${AWS_CLI_VERSION}.zip -O /tmp/awscli-bundle-${AWS_CLI_VERSION}.zip \
   && echo "${AWS_CLI_CHECKSUM}  awscli-bundle-${AWS_CLI_VERSION}.zip" > /tmp/SHA256SUM \
-  && sha256sum -c SHA256SUM \
+  && ( cd /tmp; sha256sum -c SHA256SUM || ( echo "Expected $(sha256sum awscli-bundle-${AWS_CLI_VERSION}.zip)"; exit 1; )) \
   && unzip awscli-bundle-${AWS_CLI_VERSION}.zip \
   && /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws \
   && apk del wget \
+  && rm -rf /var/cache/apk/* \
   && rm -rf /tmp/* \
   ;
 
