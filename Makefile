@@ -17,6 +17,9 @@ build-with-cache:
 test:
 	bats -r tests/
 
+_ci_test:
+	true
+
 push:
 	docker push $(IMAGE_NAME):$(TAG)
 
