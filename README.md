@@ -39,8 +39,8 @@ Or alternatively specify the environment variables:
 | --- | --- |
 | `DATABASE_HOST` | IP / hostname of PostgreSQL server. |
 | `DATABASE_PORT` | TCP Port of PostgreSQL service. |
-| `DATABASE_USER` | Administrative user eg postgres with SUPERUSER privileges. |
-| `DATABASE_PASS` | Password of administrative user. |
+| `DATABASE_USERNAME` | Administrative user eg postgres with SUPERUSER privileges. |
+| `DATABASE_PASSWORD` | Password of administrative user. |
 
 Some subcommands require additional environment parameters.
 
@@ -60,3 +60,8 @@ Using bats setup and teardown and avoiding exposing postgres ports etc should al
 ## Status
 
 Feature incomplete. Work in progress.
+
+## Local Testing
+
+* `Example` - Create user 
+docker run --rm -i -t -e DATABASE_HOST=localhost -e DATABASE_USERNAME=postgres -e DATABASE_PASSWORD=mysecretpassword -e DATABASE_PORT=5432 --network=host docker.io/panubo/postgres-toolbox create-user-db test test
