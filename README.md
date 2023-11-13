@@ -64,4 +64,5 @@ Feature incomplete. Work in progress.
 ## Local Testing
 
 * `Example` - Create user 
-docker run --rm -i -t -e DATABASE_HOST=localhost -e DATABASE_USERNAME=postgres -e DATABASE_PASSWORD=mysecretpassword -e DATABASE_PORT=5432 --network=host docker.io/panubo/postgres-toolbox create-user-db test test
+
+```docker run --rm -i -t -e DATABASE_HOST=localhost -e DATABASE_USERNAME=postgres -e DATABASE_PASSWORD=mysecretpassword -e DATABASE_PORT=5432 --network=host docker.io/panubo/postgres-toolbox create-user-db test test```
