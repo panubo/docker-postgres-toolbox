@@ -46,6 +46,7 @@ teardown_file() {
 		-e AWS_ARGS="--endpoint-url http://${minio_container_ip}:9000" \
 		-e AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE \
 		-e AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY \
+		-e AWS_DEFAULT_REGION=ap-southeast-2 \
 		"${TOOLBOX_IMAGE}" save --format custom --compression lz4 s3://db-dumps
 	diag "${output}"
 	[[ "${status}" -eq 0 ]]
