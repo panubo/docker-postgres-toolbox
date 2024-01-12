@@ -1,16 +1,20 @@
-FROM alpine:3.17
+FROM alpine:3.19
 
+ENV \
+  PYTHONIOENCODING=UTF-8 \
+  PYTHONUNBUFFERED=0 \
+  PAGER=more 
 # Install some tools
 # python is required for gsutil
 RUN set -x \
-  && apk add --update bash findutils postgresql-client gzip bzip2 lz4 xz unzip zip coreutils python3 rsync curl \
+  && apk add --update bash findutils postgresql-client gzip bzip2 lz4 xz unzip zip coreutils python3 rsync curl ca-certificates aws-cli\
   && rm -rf /var/cache/apk/* \
   ;
 
 # Install Panubo bash-container
 RUN set -x \
-  && BASHCONTAINER_VERSION=0.7.2 \
-  && BASHCONTAINER_SHA256=87c4b804f0323d8f0856cb4fbf2f7859174765eccc8b0ac2d99b767cecdcf5c6 \
+  && BASHCONTAINER_VERSION=0.8.0 \
+  && BASHCONTAINER_SHA256=0ddc93b11fd8d6ac67f6aefbe4ba790550fc98444e051e461330f10371a877f1 \
   && if [ -n "$(readlink /usr/bin/wget)" ]; then \
       fetchDeps="${fetchDeps} wget"; \
      fi \
@@ -44,8 +48,8 @@ RUN set -x \
 
 # Install Gcloud SDK (required for gsutil workload identity authentication)
 ENV \
-  GCLOUD_VERSION=424.0.0 \
-  GCLOUD_CHECKSUM=1fed39626f23352e0f97623d5009ff1bb6c4ffd3875c85f4205f309292696b18
+  GCLOUD_VERSION=459.0.0 \
+  GCLOUD_CHECKSUM=c7c02262cded63dc2f017aecfe71532da3712ab1b0a8f8d217dc42bcba259de8
 
 RUN set -x \
   && apk --no-cache add python3 \
@@ -57,27 +61,6 @@ RUN set -x \
   && ln -s /google-cloud-sdk/bin/gcloud /usr/local/bin/ \
   && ln -s /google-cloud-sdk/bin/gsutil /usr/local/bin/ \
   && rm -rf /tmp/* /root/.config/gcloud \
-  ;
-
-# Install AWS CLI
-ENV \
-  PYTHONIOENCODING=UTF-8 \
-  PYTHONUNBUFFERED=0 \
-  PAGER=more \
-  AWS_CLI_VERSION=1.27.103 \
-  AWS_CLI_CHECKSUM=0fed454146160807e273c4fd9bb1d0ba0926e3fb8ed3fc55e9251ebd2d53407c
-
-RUN set -x \
-  && apk --update add --no-cache ca-certificates wget unzip \
-  && cd /tmp \
-  && wget -nv https://s3.amazonaws.com/aws-cli/awscli-bundle-${AWS_CLI_VERSION}.zip -O /tmp/awscli-bundle-${AWS_CLI_VERSION}.zip \
-  && echo "${AWS_CLI_CHECKSUM}  awscli-bundle-${AWS_CLI_VERSION}.zip" > /tmp/SHA256SUM \
-  && ( cd /tmp; sha256sum -c SHA256SUM || ( echo "Expected $(sha256sum awscli-bundle-${AWS_CLI_VERSION}.zip)"; exit 1; )) \
-  && unzip awscli-bundle-${AWS_CLI_VERSION}.zip \
-  && /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws \
-  && apk del wget \
-  && rm -rf /var/cache/apk/* \
-  && rm -rf /tmp/* \
   ;
 
 COPY commands /usr/local/bin/
